@@ -26,7 +26,7 @@ def get_rawData(client,place):
 def update_result(client,result):
     collection = client.sichuan
     try:
-        # collection.city_1.update({'url': result['url']}, {'$set': result})
+        # collection.city_result.update({'Image': result['Image']}, {'$set': result})
         collection.city_result.insert(result)
         client.close()
     except Exception as e:

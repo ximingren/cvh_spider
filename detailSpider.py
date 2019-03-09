@@ -7,7 +7,7 @@ import requests
 import tqdm
 from lxml import etree
 
-from test_case.cvh_spider.tool import get_ip1, update_result, get_rawData, write_error
+from tool import get_ip1, update_result, get_rawData, write_error
 
 
 def detail_download(url, type, data=None):
@@ -16,13 +16,13 @@ def detail_download(url, type, data=None):
     while (flag):
         try:
             if type == 1:
-                res = requests.post(url, data=data, proxies=get_ip1(),timeout=100)
+                res = requests.post(url, data=data,timeout=100)
             else:
-                res = requests.get(url, proxies=get_ip1())
+                res = requests.get(url)
             print(res)
         except:
             flag = True
-            print('重新访问,detail')
+            print('\n重新访问,detail')
             return res
         else:
             if res.status_code == 200:
@@ -66,9 +66,10 @@ def parse(res, place):
 
 def spider_main(client,data, place):
     res = detail_download('http://www.cvh.ac.cn/' + data['url'], type=0)
+    print(res.url)
     global num, count
     num = num + 1
-    print(place, ' ', num, '/', count)
+    print(place,num,'/',count)
     result = parse(res, place)
     result = get_character(res, result)
     update_result(client,result)
@@ -79,8 +80,9 @@ def detail_spider(client,place,v):
     num = v
     print('爬取详情数据',place)
     data = get_rawData(client,place)
-    count = data.count()
-    for i in data[v:]:
+    count=data.count()
+    data=list(data[v:])
+    for i in tqdm.tqdm(data,desc=place):
         spider_main(client,i, place)
 
 
@@ -92,7 +94,7 @@ def get_character(res, data):
     try:
         tree = etree.HTML(info_res.json()['classtxt'])
     except Exception as e:
-        print('重新访问,character',e)
+        print('\n重新访问,character',e)
     else:
         family = tree.xpath('//div')[-3].xpath('string(.)')
         genus = tree.xpath('//div')[-2].xpath('string(.)')
@@ -111,9 +113,9 @@ def get_character(res, data):
 if __name__ == '__main__':
     HOST = "127.0.0.1"
     PORT = 27017
-    client = pymongo.MongoClient(HOST, PORT)
-    detail_spider(client,'都江堰市',6152)
-    write_error(client,'都江堰市', 2)
+    client = pymongo.MongoClient(HOST, PORT)#雅江县 3680     道孚县 3762  稻城县 4288 德昌县 2502 金阳县 1717 冕宁县 1883  美姑县 3610 盐源县 1952 木里藏族自治县 6613  道孚县 4475
+    detail_spider(client,'稻城县',4392)# 德昌县 887 马尔康县 4329  泸定县  6350  康定县  6109  冕宁县 306
+    write_error(client,'稻城县', 2)#都江堰市   5130   洪雅县   6247   屏山县   3290
     # HOST = "123.207.42.164"
     # PORT = 27017
     # client = pymongo.MongoClient(HOST, PORT)

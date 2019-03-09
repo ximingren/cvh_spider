@@ -3,7 +3,7 @@ import requests
 from lxml import etree
 from tqdm import trange
 
-from test_case.cvh_spider.tool import insert_one, write_error, get_ip1
+from tool import get_ip1, insert_one, write_error
 
 
 def list_download(place, page):
